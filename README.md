@@ -1,30 +1,39 @@
 # PopularitySurvey
 
+## Table of contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Uninstallation](#uninstallation)
+- [User Guid](#user-guid)
+  - [Basics](#basics)
+
 ## Overview
 
 Ranks the followers of the specified user in order of popularity.
 Retrieve the number of followers of a follower and display them in order of the number of followers.
 
 
-## Building
-```bash
-$ cd src
-$ go build
-```
+## Installation
+1. Install command
+    ```bash
+   $ make install
+   ```
+2. Setup environment variable
+   - TWITTER_BEARER_TOKEN(`export TWITTER_BEARER_TOKEN=XXX`)
+     - Twitter API Bearer Token.
 
-## Setup
-### Environment variable
-- TWITTER_BEARER_TOKEN
-  - Twitter API Bearer Token (`export TWITTER_BEARER_TOKEN=XXX`)
+
+## Uninstallation
+1. Uninstall command
+    ```bash
+   $ make uninstall
+   ```
+
 
 ## User Guid
 
-### Table of contents
-
-* [Basics](#basics)
-
 ### Basics
 ```bash
-$ ./PopularitySurvey survey -s {{ Survey target screen name (e.g. ibnr2hc) }}
+$ popularity_survey survey -s {{ Survey target screen name (e.g. ibnr2hc) }}
 ```
-
