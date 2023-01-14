@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/olekukonko/tablewriter"
 	"github.com/sivchari/gotwtr"
 	"github.com/spf13/cobra"
 	"log"
@@ -102,14 +103,19 @@ var surveyCmd = &cobra.Command{
 			fmt.Println("[Debug]　 → NextToken: " + nextToken)
 		}
 		sort.Sort(sort.Reverse(sort.IntSlice(followerIndex)))
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Rank", "DisplayName", "ScreenName", "Followers Count"})
 		for i, v := range followerIndex {
-			fmt.Println("[Info] 人気フォロワー" + strconv.Itoa(i+1) + "位：" + followerInfo[v]["displayName"] + "(@" + followerInfo[v]["screenName"] + ") // フォロワー数" + strconv.Itoa(v) + "人")
+			table.Append([]string{strconv.Itoa(i + 1), followerInfo[v]["displayName"], "@" + followerInfo[v]["screenName"], strconv.Itoa(v)})
 
+			// 上位20名のみ表示する。
 			const RANKING_LIMIT = 20
 			if i >= RANKING_LIMIT-1 {
 				break
 			}
 		}
+		fmt.Println("[Info] フォロワー数ランキングの計算が終了しました。")
+		table.Render()
 	},
 }
 
