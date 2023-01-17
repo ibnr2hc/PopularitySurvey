@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-// User Twitterの1ユーザーを表現する。
+// User Twitterの1ユーザーを表現する
 type User struct {
 	ID            string // UserID(e.g. 123456789)
 	DisplayName   string // ディスプレイネーム(e.g. あいうえお)
@@ -19,6 +19,14 @@ type User struct {
 	FollowerCount int    // フォロワー数
 	Followers     []User // フォロワー
 }
+
+// IUser interface
+type IUser interface {
+	GetFollowerForTopRanking() []User
+	fetchFollower()
+}
+
+var _ IUser = (*User)(nil)
 
 // NewUserForSurveyTarget 調査対象のユーザーのUser structを返す。
 //
