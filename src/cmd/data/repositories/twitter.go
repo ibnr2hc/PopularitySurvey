@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"github.com/ibnr2hc/PopularitySurvey/cmd/config"
 	"github.com/sivchari/gotwtr"
 	"log"
 	"os"
@@ -15,8 +16,10 @@ type Twitter struct {
 	client *gotwtr.Client
 }
 
-// NewTwitter
-// TODO: doc
+// NewTwitter Twitter APIに関連する機能を持つTwitter structを返す
+//
+// Returns:
+//   - twitter Twitter: Twitter Repositoryを持つstruct
 func NewTwitter() *Twitter {
 	TOKEN := os.Getenv("TWITTER_BEARER_TOKEN")
 	if TOKEN == "" {
@@ -27,10 +30,16 @@ func NewTwitter() *Twitter {
 	}
 }
 
-// GetFollowers
-// TODO: doc
-// TODO: refactoring
-func (t *Twitter) GetFollowers(userId string) []map[string]string {
+// フォロワーを取得する
+//
+// Args:
+//   - userId string   : フォロワーを取得する対象のユーザーID
+//   - nextToken string: TWITTER APIのページネーショントークン
+//
+// Returns:
+//   - followers gotwtr.FollowersResponse: フォロワー情報
+//   - isRetry bool                      : リトライが必要か
+func (t *Twitter) getFollower(userId string, nextToken string) (*gotwtr.FollowersResponse, bool) {
 	opt := gotwtr.FollowOption{
 		UserFields: []gotwtr.UserField{
 			gotwtr.UserFieldName,
@@ -40,28 +49,44 @@ func (t *Twitter) GetFollowers(userId string) []map[string]string {
 		},
 		MaxResults: 1000,
 	}
+	if nextToken != "" { // ページネーションのトークンがある場合
+		opt.PaginationToken = nextToken
+	}
 
+	followers, err := t.client.Followers(context.Background(), userId, &opt)
+	if err != nil {
+		// レート制限を超えている場合はしばらく待機する
+		if strings.Contains(err.Error(), "429") {
+			fmt.Println("[Debug] レート制限のため待機し再度実行します...")
+			time.Sleep(config.RATE_LIMIT_WAITING_SECOND) // レート制限による再度実行のため待機
+			return &gotwtr.FollowersResponse{}, true
+		}
+		// 長時間のHTTP Connectionにより切断された場合は再度実行する
+		if strings.Contains(err.Error(), "read: connection reset by peer") {
+			fmt.Println("[Debug] HTTP Connectionが切断されたため再度実行します。")
+			time.Sleep(config.RECONNECT_HTTP_WAITING_SECOND) // コネクション切断による再接続のための待機
+			return &gotwtr.FollowersResponse{}, true
+		}
+		// レート制限以外のエラーの場合は処理を終了する
+		log.Fatal("[Error] Something Error: " + err.Error())
+	}
+	return followers, false
+}
+
+// GetAllFollowers 指定したuserIdのフォロワー情報を返却する
+//
+// Args:
+//   - userId string: 調査するユーザーのID
+//
+// Returns:
+//   - followers []map[string]string: フォロワーの情報
+func (t *Twitter) GetAllFollowers(userId string) []map[string]string {
 	nextToken := ""
 	followerInfo := []map[string]string{}
 	for { // フォロワー情報の全てを取得するまで処理を行う
-		followers, err := t.client.Followers(context.Background(), userId, &opt)
-		if err != nil {
-			// レート制限を超えている場合はしばらく待機する
-			if strings.Contains(err.Error(), "429") {
-				fmt.Println("[Debug] レート制限のため待機し再度実行します...")
-				// TODO: config化する
-				time.Sleep(time.Second * 120) // レート制限による再度実行のため待機
-				continue
-			}
-			// 長時間のHTTP Connectionにより切断された場合は再度実行する
-			if strings.Contains(err.Error(), "read: connection reset by peer") {
-				fmt.Println("[Debug] HTTP Connectionが切断されたため再度実行します。")
-				// TODO: config化する
-				time.Sleep(time.Second * 60) // コネクション切断による再接続のための待機
-				continue
-			}
-			// レート制限以外のエラーの場合は処理を終了する
-			log.Fatal("[Error] Something Error: " + err.Error())
+		followers, needToRetry := t.getFollower(userId, nextToken)
+		if needToRetry { // レート制限などによりリトライが必要な場合
+			continue
 		}
 
 		// 取得したフォロワー情報を整形する
@@ -82,55 +107,11 @@ func (t *Twitter) GetFollowers(userId string) []map[string]string {
 			break
 		}
 
-		opt.PaginationToken = nextToken
 		fmt.Println("[Debug]　 → NextToken: " + nextToken)
 	}
 	return followerInfo
 
 }
-
-//		nextToken := ""
-//		followerInfo := map[int]map[string]string{}
-//		// TODO: フォロワー数でソートし、フォロワー数をキーにしてランキング結果を表示すると同一のフォロワー数をもつユーザー1人分が複数出てしまう。対応する。
-//		followerIndex := []int{}
-//		for {
-//			followers, err := client.Followers(context.Background(), surveyTargetUserInfo.User.ID, &followerOpt)
-//			if err != nil {
-//				// レート制限を超えている場合はしばらく待機する
-//				if strings.Contains(err.Error(), "429") {
-//					fmt.Println("[Debug] レート制限のため待機し再度実行します...")
-//					time.Sleep(time.Second * 310) // 5分10秒。10秒はAPIをリクエストしている時間分のバッファを考慮した。
-//					continue
-//				}
-//
-//				// 長時間のHTTP Connectionにより切断された場合は再度実行する
-//				if strings.Contains(err.Error(), "read: connection reset by peer") {
-//					fmt.Println("[Debug] HTTP Connectionが切断されたため再度実行します。")
-//					time.Sleep(time.Second * 60)
-//					continue
-//				}
-//
-//				// レート制限以外のエラーの場合は処理を終了する。
-//				log.Fatal("[Error] Something Error: " + err.Error())
-//			}
-//			for _, v := range followers.Users {
-//				followerInfo[v.PublicMetrics.FollowersCount] = map[string]string{
-//					"screenName":  v.UserName,
-//					"displayName": v.Name,
-//				}
-//				followerIndex = append(followerIndex, v.PublicMetrics.FollowersCount)
-//			}
-//
-//			fmt.Println("[Debug] " + strconv.Itoa(len(followerIndex)) + "のユーザー情報を取得しました。")
-//			nextToken = followers.Meta.NextToken
-//			if nextToken == "" {
-//				fmt.Println("[Debug] 最終のPaginationTokenまで達したためフォロワー取得処理を終了します。")
-//				break
-//			}
-//
-//			followerOpt.PaginationToken = nextToken
-//			fmt.Println("[Debug]　 → NextToken: " + nextToken)
-//		}
 
 // GetUserInfo ユーザー情報を取得する。
 //

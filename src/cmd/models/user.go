@@ -108,7 +108,7 @@ func (u *User) GetFollowerForTopRanking() []User {
 // フォロワーを取得し、User.followersに保持する。
 func (u *User) fetchFollower() {
 	twitter := repositories.NewTwitter()
-	followers := twitter.GetFollowers(u.ID)
+	followers := twitter.GetAllFollowers(u.ID)
 
 	for _, follower := range followers {
 		followerCount, _ := strconv.Atoi(follower["followerCount"])
