@@ -7,3 +7,7 @@ uninstall:
 	@echo "Start uninstallation..."
 	@which popularity_survey | sudo xargs rm
 	@echo "Uninstallation is completed."
+
+test:
+	@echo "Start Test..."
+	@(cd src; go test ./...)
