@@ -2,7 +2,7 @@ package tests
 
 import (
 	"github.com/ibnr2hc/PopularitySurvey/cmd/models"
-	"strconv"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -36,19 +36,25 @@ func TestUser_GetFollowerForTopRanking(t *testing.T) {
 	rankingFollower := user.GetFollowerForTopRanking()
 
 	// Test
-	if rankingFollower[0].ID != followers[1].ID {
-		t.Error("Not expected ID=" + rankingFollower[0].ID + ", expect " + followers[1].ID)
-	}
-	if rankingFollower[0].DisplayName != followers[1].DisplayName {
-		t.Error("Not expected DisplayName=" + rankingFollower[0].DisplayName + ", expect " + followers[1].DisplayName)
-	}
-	if rankingFollower[0].ScreenName != followers[1].ScreenName {
-		t.Error("Not expected ScreenName=" + rankingFollower[0].ScreenName + ", expect " + followers[1].ScreenName)
-	}
-	if rankingFollower[0].Followers[0].ID != followers[1].Followers[0].ID {
-		t.Error("Not expected Followers=" + rankingFollower[0].Followers[0].ID + ", expect " + followers[1].Followers[0].ID)
-	}
-	if rankingFollower[0].FollowerCount != followers[1].FollowerCount {
-		t.Error("Not expected FollowCount=" + strconv.Itoa(rankingFollower[0].FollowerCount) + ", expect " + strconv.Itoa(followers[1].FollowerCount))
-	}
+	assert.Equal(t, rankingFollower[0].ID, followers[1].ID)
+	assert.Equal(t, rankingFollower[0].DisplayName, followers[1].DisplayName)
+	assert.Equal(t, rankingFollower[0].ScreenName, followers[1].ScreenName)
+	assert.Equal(t, rankingFollower[0].FollowerCount, followers[1].FollowerCount)
+	assert.Equal(t, rankingFollower[0].Followers[0].ID, followers[1].Followers[0].ID)
 }
+
+// 正常系: 処理がエラーが出ずに終了すること
+func TestUser_ShowFollowers(t *testing.T) {
+	defer func() {
+		err := recover()
+		if err != nil {
+			t.Error("Unexpected processing.")
+		}
+	}()
+
+	followers := []models.User{}
+	models.ShowFollowers(followers)
+}
+
+// TODO: fetchFollower()
+// TODO: NewUserForSurveyTarget()
