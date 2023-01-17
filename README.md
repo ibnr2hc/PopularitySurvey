@@ -15,7 +15,7 @@ Ranks the followers of the specified user in order of popularity.
 Retrieve the number of followers of a follower and display them in order of the number of followers.
 
 
-# System Requirements
+## System Requirements
 
 | System | Version |
 | ------ | ------- |
@@ -24,7 +24,7 @@ Retrieve the number of followers of a follower and display them in order of the 
 
 ## Installation
 1. Install command
-    ```bash
+   ```bash
    $ make install
    ```
 2. Setup environment variable
@@ -34,7 +34,7 @@ Retrieve the number of followers of a follower and display them in order of the 
 
 ## Uninstallation
 1. Uninstall command
-    ```bash
+   ```bash
    $ make uninstall
    ```
 
@@ -45,3 +45,5 @@ Retrieve the number of followers of a follower and display them in order of the 
 ```bash
 $ popularity_survey survey -s {{ Survey target screen name (e.g. ibnr2hc) }}
 ```
+![f24b4dd7-677b-4c8d-98c7-32d6ab594733](https://user-images.githubusercontent.com/43519598/213014643-1abface5-685f-4313-b27f-8ab7f1979be2.jpeg)
+
