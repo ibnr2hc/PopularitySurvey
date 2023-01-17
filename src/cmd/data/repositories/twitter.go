@@ -111,7 +111,7 @@ func (t *Twitter) GetAllFollowers(userId string) []map[string]string {
 		}
 
 		resultsCount = resultsCount + followers.Meta.ResultCount
-		fmt.Println("[Debug] 計" + strconv.Itoa(resultsCount) + "ユーザー情報を取得しました。")
+		fmt.Println("[Debug] 計" + strconv.Itoa(resultsCount) + "件のユーザー情報を取得しました。")
 		nextToken = followers.Meta.NextToken
 		if nextToken == "" { // フォロワー情報を全て取得した後にフォロワー取得処理を終える。
 			fmt.Println("[Debug] 最終のPaginationTokenまで達したためフォロワー取得処理を終了します。")
