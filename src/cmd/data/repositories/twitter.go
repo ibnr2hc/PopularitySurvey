@@ -159,8 +159,10 @@ func (t *Twitter) GetUserInfo(screenName string) map[string]string {
 			log.Fatal("[Error] レート制限のためしばらくしてから実行してください。")
 		}
 		// 他の何かしらのエラーの場合
-		// TODO: 存在しないユーザーはこの分岐を通らない
-		log.Fatal("[Error] 存在しないScreenNameか、もしくは何かしらのエラーが発生しました。")
+		log.Fatal("[Error] 何かしらのエラーが発生しました。")
+	}
+	if user.User == nil { // 存在しないユーザーの場合
+		log.Fatal("[Error] 存在しないScreenNameです。")
 	}
 
 	return map[string]string{
