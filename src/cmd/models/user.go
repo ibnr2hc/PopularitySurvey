@@ -14,16 +14,16 @@ import (
 // User Twitterの1ユーザーを表現する。
 type User struct {
 	ID            string // UserID(e.g. 123456789)
-	displayName   string // ディスプレイネーム(e.g. あいうえお)
-	screenName    string // スクリーンネーム(e.g. aiueo123)
-	followerCount int    // フォロワー数
-	followers     []User // フォロワー
+	DisplayName   string // ディスプレイネーム(e.g. あいうえお)
+	ScreenName    string // スクリーンネーム(e.g. aiueo123)
+	FollowerCount int    // フォロワー数
+	Followers     []User // フォロワー
 }
 
 // NewUserForSurveyTarget 調査対象のユーザーのUser structを返す。
 //
 // Args:
-//   - screenName string: スクリーンネーム(@は不要)
+//   - ScreenName string: スクリーンネーム(@は不要)
 //
 // Returns:
 //   - user User: Twitterユーザー
@@ -32,7 +32,7 @@ type User struct {
 //   - 何らかの理由によりフォロワー数が取得できない場合。
 func NewUserForSurveyTarget(screenName string) *User {
 	user := new(User)
-	user.screenName = screenName
+	user.ScreenName = screenName
 
 	// ユーザー情報を取得する
 	twitter := repositories.NewTwitter()
@@ -41,20 +41,20 @@ func NewUserForSurveyTarget(screenName string) *User {
 	if err != nil { // 何らかの理由によりフォロワー数が取得できない場合
 		log.Fatal(err)
 	}
-	user.followerCount = followerCount
+	user.FollowerCount = followerCount
 	user.ID = userInfo["ID"]
-	user.displayName = userInfo["displayName"]
+	user.DisplayName = userInfo["displayName"]
 	// フォロワー情報を取得する
 	user.fetchFollower()
 
-	fmt.Println("[Info] 調査対象：" + user.displayName + "(@" + user.screenName + ")")
+	fmt.Println("[Info] 調査対象：" + user.DisplayName + "(@" + user.ScreenName + ")")
 	return user
 }
 
 // ShowFollowers フォロワーをランキング形式で表示する。
 //
 // Args:
-//   - followers []User: ランキングで表示したいフォロワーの配列
+//   - Followers []User: ランキングで表示したいフォロワーの配列
 func ShowFollowers(followers []User) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{
@@ -67,9 +67,9 @@ func ShowFollowers(followers []User) {
 	for i, follower := range followers {
 		table.Append([]string{
 			strconv.Itoa(i + 1),
-			follower.displayName,
-			"@" + follower.screenName,
-			strconv.Itoa(follower.followerCount),
+			follower.DisplayName,
+			"@" + follower.ScreenName,
+			strconv.Itoa(follower.FollowerCount),
 		})
 
 		// 上位n名のみ表示する。
@@ -89,9 +89,9 @@ func (u *User) GetFollowerForTopRanking() []User {
 	// TODO: 処理を最適化したい
 	followersCount := []int{}   // フォロワーのフォロワー数一覧(e.g. [1, 50, 100])
 	followers := map[int]User{} // フォロワー数をキーとしたフォロワー(e.g. {1: User{}, 50: User{}})
-	for _, follower := range u.followers {
-		followersCount = append(followersCount, follower.followerCount)
-		followers[follower.followerCount] = follower
+	for _, follower := range u.Followers {
+		followersCount = append(followersCount, follower.FollowerCount)
+		followers[follower.FollowerCount] = follower
 	}
 
 	// フォロワーのフォロワー数を基準に上位からソートする。
@@ -112,10 +112,10 @@ func (u *User) fetchFollower() {
 
 	for _, follower := range followers {
 		followerCount, _ := strconv.Atoi(follower["followerCount"])
-		u.followers = append(u.followers, User{
-			displayName:   follower["displayName"],
-			screenName:    follower["screenName"],
-			followerCount: followerCount,
+		u.Followers = append(u.Followers, User{
+			DisplayName:   follower["displayName"],
+			ScreenName:    follower["screenName"],
+			FollowerCount: followerCount,
 		})
 
 	}
