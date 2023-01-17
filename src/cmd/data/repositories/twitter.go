@@ -93,6 +93,7 @@ func (t *Twitter) getFollower(userId string, nextToken string) (*gotwtr.Follower
 func (t *Twitter) GetAllFollowers(userId string) []map[string]string {
 	nextToken := ""
 	followerInfo := []map[string]string{}
+	resultsCount := 0
 	for { // フォロワー情報の全てを取得するまで処理を行う
 		followers, needToRetry := t.getFollower(userId, nextToken)
 		if needToRetry { // レート制限などによりリトライが必要な場合
@@ -109,8 +110,8 @@ func (t *Twitter) GetAllFollowers(userId string) []map[string]string {
 			})
 		}
 
-		// TODO: 取得したユーザー数を表示する
-		fmt.Println("[Debug] ユーザー情報を取得しました。")
+		resultsCount = resultsCount + followers.Meta.ResultCount
+		fmt.Println("[Debug] 計" + strconv.Itoa(resultsCount) + "ユーザー情報を取得しました。")
 		nextToken = followers.Meta.NextToken
 		if nextToken == "" { // フォロワー情報を全て取得した後にフォロワー取得処理を終える。
 			fmt.Println("[Debug] 最終のPaginationTokenまで達したためフォロワー取得処理を終了します。")
