@@ -12,9 +12,19 @@ import (
 	"time"
 )
 
+// Twitter Twitter APIを内包するstruct
 type Twitter struct {
 	client *gotwtr.Client
 }
+
+// ITwitter interface
+type ITwitter interface {
+	getFollower(userId string, nextToken string) (*gotwtr.FollowersResponse, bool)
+	GetAllFollowers(userId string) []map[string]string
+	GetUserInfo(screenName string) map[string]string
+}
+
+var _ ITwitter = (*Twitter)(nil)
 
 // NewTwitter Twitter APIに関連する機能を持つTwitter structを返す
 //
